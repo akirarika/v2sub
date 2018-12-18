@@ -1,0 +1,110 @@
+#!/usr/bin/python3
+# -*- coding: UTF-8 -*-
+
+import sys
+import os
+import requests
+import base64
+import json
+import subprocess
+import re
+
+if os.geteuid() != 0:
+    print("您需要切换到 Root 身份才可以使用本脚本。尝试在命令前加上 sudo?\n")
+    exit()
+
+subFilePath = os.path.expandvars('$HOME') + '/.v2sub.conf'
+
+if not os.path.exists(subFilePath):
+    open(subFilePath, 'w+')
+
+subFile = open(subFilePath, 'r')
+subLink = subFile.read().strip()
+subFile.close()
+
+if not subLink:
+    print('您还没有输入订阅地址，请输入订阅地址。')
+    subLink = input('订阅地址：')
+    subFile = open(subFilePath, 'w+')
+    subFile.write(subLink)
+    subFile.close()
+else:
+    print('订阅地址：'+subLink)
+
+print("\n开始从订阅地址中读取服务器节点… 如等待时间过久，请检查网络。\n")
+
+# 获取订阅信息
+serverListLink = base64.b64decode(requests.get(subLink).content).splitlines()
+for i in range(len(serverListLink)):
+    serverNode = json.loads(base64.b64decode(bytes.decode(serverListLink[i]).replace('vmess://','')))
+    print('【' + str(i) + '】' + serverNode['ps'])
+    serverListLink[i] = serverNode
+
+while True:
+    setServerNodeId = int(input("\n请输入要切换的节点编号："))
+    subprocess.call('ping ' + serverListLink[setServerNodeId]['add'] + ' -c 3 -w 10', shell = True)
+    if re.search('[yesYES]', input('确定要使用该节点吗？[y/N] ')):
+        break
+
+# 编辑 v2ray 配置文件
+v2rayConf = {
+  "inbound": {
+    "port": 1080,
+    "listen": "127.0.0.1",
+    "protocol": "socks",
+    "settings": {
+      "udp": True
+    }
+  },
+  "outbound": {
+    "protocol": "vmess",
+    "settings": {
+      "vnext": [{
+        "address": serverListLink[setServerNodeId]['add'],
+        "port": int(serverListLink[setServerNodeId]['port']),
+        "users": [{ "id": serverListLink[setServerNodeId]['id'] }]
+      }]
+    }
+  },
+  "outboundDetour": [{
+    "protocol": "freedom",
+    "tag": "direct",
+    "settings": {}
+  }],
+  "routing": {
+    "strategy": "rules",
+    "settings": {
+      "domainStrategy": "IPOnDemand",
+      "rules": [{
+        "type": "field",
+        "ip": [
+          "0.0.0.0/8",
+          "10.0.0.0/8",
+          "100.64.0.0/10",
+          "127.0.0.0/8",
+          "169.254.0.0/16",
+          "172.16.0.0/12",
+          "192.0.0.0/24",
+          "192.0.2.0/24",
+          "192.168.0.0/16",
+          "198.18.0.0/15",
+          "198.51.100.0/24",
+          "203.0.113.0/24",
+          "::1/128",
+          "fc00::/7",
+          "fe80::/10"
+        ],
+        "outboundTag": "direct"
+      }]
+    }
+  }
+}
+
+json.dump(v2rayConf, open('/etc/v2ray/config.json', 'w'), indent=2)
+
+print("\n重启 v2ray 服务……\n")
+subprocess.call('systemctl restart v2ray.service', shell = True)
+
+print('地址切换完成')
+
+exit()
