@@ -4,7 +4,7 @@
 
 ## 使用方式
 
-本脚本采用 Python3 编写，直接调用 v2ray 命令及直接更改 v2ray 的配置文件。所以，您需要安装 python3 跟 v2ray 才能使用。
+本脚本使用 Python3 编写，通过直接调用 v2ray 命令及直接更改 v2ray 的配置文件来实现。所以，您需要安装 python3 跟 v2ray 才能使用。
 
 使用本脚本很简单，以 root 用户身份执行即可。`sudo ./v2sub`
 
