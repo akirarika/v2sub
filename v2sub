@@ -9,10 +9,12 @@ import json
 import subprocess
 import re
 
+# 鉴权
 if os.geteuid() != 0:
     print("您需要切换到 Root 身份才可以使用本脚本。尝试在命令前加上 sudo?\n")
     exit()
 
+# 获取订阅地址
 subFilePath = os.path.expandvars('$HOME') + '/.v2sub.conf'
 
 if not os.path.exists(subFilePath):
