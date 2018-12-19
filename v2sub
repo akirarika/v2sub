@@ -14,9 +14,10 @@ if os.geteuid() != 0:
     print("您需要切换到 Root 身份才可以使用本脚本。尝试在命令前加上 sudo?\n")
     exit()
 
-# 获取订阅地址
+# 本脚本的配置文件，目前的作用是仅存储用户输入的订阅地址，这样用户再次启动脚本时，就无需再输入订阅地址。
+# 预设的存储的路径为存储到用户的 HOME 内。
 subFilePath = os.path.expandvars('$HOME') + '/.v2sub.conf'
-
+# 获取订阅地址
 if not os.path.exists(subFilePath):
     open(subFilePath, 'w+')
 
