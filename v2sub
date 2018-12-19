@@ -32,6 +32,7 @@ if not subLink:
     subFile.close()
 else:
     print('订阅地址：'+subLink)
+print('如果您的订阅地址有误，请删除或编辑 '+subFilePath)
 
 print("\n开始从订阅地址中读取服务器节点… 如等待时间过久，请检查网络。\n")
 
