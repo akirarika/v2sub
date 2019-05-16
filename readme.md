@@ -12,8 +12,7 @@
 
 当您使用过后，您可以将本脚本的软连接添加至 `/usr/bin` 或者其他的什么地方，这样您在想换代理服务器时，只需要在终端敲 `v2sub` 就好了。
 
-## 在 Arch Linux 下安装 v2ray
+## 安装 v2ray
 ```
-sudo pacman -S v2ray
-systemctl enable v2ray.service
+sudo bash <(curl -L -s https://install.direct/go.sh)
 ```
